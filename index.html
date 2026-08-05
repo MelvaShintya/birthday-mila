@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Mila Putri (Mila Kampung)</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #f7ede2;
+            --book-cover: #f4acb7;
+            --paper-color: #fffbf5;
+            --paper-line: #e3d5ca;
+            --accent-pink: #ffb5a7;
+            --soft-pink: #fec5bb;
+            --rose-gold: #d4a373;
+            --text-color: #574b47;
+            --shadow: rgba(87, 75, 71, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Nonaktifkan scroll utama agar terasa seperti aplikasi / buku fisik */
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#d4a373 0.75px, transparent 0.75px), radial-gradient(#d4a373 0.75px, #f7ede2 0.75px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            user-select: none;
+        }
+
+        /* Loading Screen */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background-color: var(--bg-color);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.6s ease, visibility 0.6s;
+        }
+
+        .loader-heart {
+            font-size: 3rem;
+            color: var(--soft-pink);
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            to { transform: scale(1.2); }
+        }
+
+        /* Audio Control Button */
+        .music-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--paper-color);
+            border: 2px solid var(--rose-gold);
+            color: var(--rose-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .music-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* BOOK CONTAINER & 3D PERSPECTIVE */
+        .book-wrapper {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            perspective: 1800px;
+            padding: 20px;
+        }
+
+        .book {
+            width: 90%;
+            max-width: 480px;
+            height: 650px;
+            max-height: 82vh;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+
+        /* PAGES STYLING */
+        .page {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform 0.9s cubic-bezier(0.645, 0.045, 0.355, 1);
+            border-radius: 8px 18px 18px 8px;
+            box-shadow: inset 15px 0 20px -10px rgba(0,0,0,0.1), 3px 5px 15px var(--shadow);
+            cursor: pointer;
+            overflow: hidden;
+            background-color: var(--paper-color);
+        }
+
+        /* Page Layering Z-Index */
+        .page:nth-child(1) { z-index: 8; }
+        .page:nth-child(2) { z-index: 7; }
+        .page:nth-child(3) { z-index: 6; }
+        .page:nth-child(4) { z-index: 5; }
+        .page:nth-child(5) { z-index: 4; }
+        .page:nth-child(6) { z-index: 3; }
+        .page:nth-child(7) { z-index: 2; }
+        .page:nth-child(8) { z-index: 1; }
+
+        /* Flipped state */
+        .page.flipped {
+            transform: rotateY(-180deg);
+        }
+
+        .page.flipped:nth-child(1) { z-index: 1; }
+        .page.flipped:nth-child(2) { z-index: 2; }
+        .page.flipped:nth-child(3) { z-index: 3; }
+        .page.flipped:nth-child(4) { z-index: 4; }
+        .page.flipped:nth-child(5) { z-index: 5; }
+        .page.flipped:nth-child(6) { z-index: 6; }
+        .page.flipped:nth-child(7) { z-index: 7; }
+        .page.flipped:nth-child(8) { z-index: 8; }
+
+        /* Page Content Structure */
+        .page-content {
+            width: 100%;
+            height: 100%;
+            padding: 30px 25px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-image: linear-gradient(var(--paper-line) 1px, transparent 1px);
+            background-size: 100% 28px;
+            background-position: 0 10px;
+        }
+
+        /* Page Numbering & Bookmark Ribbon */
+        .page-number {
+            position: absolute;
+            bottom: 12px;
+            right: 20px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.1rem;
+            color: var(--rose-gold);
+        }
+
+        .bookmark-ribbon {
+            position: absolute;
+            top: -10px;
+            right: 30px;
+            width: 20px;
+            height: 60px;
+            background-color: var(--soft-pink);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        /* SCRAPBOOK DECORATIONS */
+        .washi-tape {
+            position: absolute;
+            height: 24px;
+            background: rgba(254, 197, 187, 0.7);
+            border: 1px dashed rgba(212, 163, 115, 0.4);
+            transform: rotate(-3deg);
+            z-index: 5;
+        }
+
+        .sticky-note {
+            background-color: #fffae5;
+            padding: 15px;
+            border-radius: 2px;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.08);
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.2rem;
+            color: #4a3e3d;
+            position: relative;
+            transform: rotate(2deg);
+        }
+
+        .polaroid-frame {
+            background: white;
+            padding: 12px 12px 35px 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: rotate(-2deg);
+            text-align: center;
+            border: 1px solid #f0e6df;
+            transition: transform 0.3s ease;
+        }
+
+        .polaroid-frame:hover {
+            transform: scale(1.03) rotate(0deg);
+            z-index: 10;
+        }
+
+        .polaroid-img {
+            width: 100%;
+            height: 110px;
+            background-color: #f7ede2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--rose-gold);
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px stroke #eee;
+            object-fit: cover;
+        }
+
+        .polaroid-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Menjaga proporsi foto agar tidak gepeng */
+            border-radius: 4px;
+        }
+
+        .handwritten {
+            font-family: 'Caveat', cursive;
+            color: #3d3432;
+        }
+
+        /* NAV CONTROLS */
+        .nav-controls {
+            margin-top: 25px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .btn-nav {
+            background-color: var(--paper-color);
+            color: var(--text-color);
+            border: 2px solid var(--rose-gold);
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .btn-nav:hover:not(:disabled) {
+            background-color: var(--rose-gold);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-nav:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: #ccc;
+        }
+
+        /* PAGE SPECIFIC STYLES */
+        
+        /* COVER PAGE */
+        .cover-page {
+            background: var(--book-cover) !important;
+            background-image: radial-gradient(var(--soft-pink) 2px, transparent 2px) !important;
+            background-size: 20px 20px !important;
+            border: 4px solid #f096a6;
+            color: #fff;
+            text-align: center;
+            justify-content: center !important;
+            align-items: center;
+        }
+
+        .cover-title {
+            font-family: 'Caveat', cursive;
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+            color: #ffffff;
+            margin-bottom: 0;
+        }
+
+        .cover-subtitle {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 2rem;
+            color: #fff0f3;
+        }
+
+        .cover-badge {
+            background: white;
+            color: var(--book-cover);
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.2rem;
+            display: inline-block;
+            margin-top: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* PAGE 7 / ENDING */
+        .ending-page {
+            background: #fff0f3 !important;
+            text-align: center;
+        }
+
+        /* Floating Animation Objects */
+        .floating-flower {
+            position: absolute;
+            font-size: 1.2rem;
+            color: var(--soft-pink);
+            animation: float 4s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(10deg); }
+        }
+
+        /* Responsive Fix */
+        @media (max-width: 576px) {
+            .book {
+                height: 560px;
+            }
+            .cover-title {
+                font-size: 2.8rem;
+            }
+            .page-content {
+                padding: 20px 18px;
+            }
+            .polaroid-img {
+                height: 85px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loader">
+        <i class="fa-solid fa-heart loader-heart mb-3"></i>
+        <p class="handwritten fs-3">Menyiapkan Scrapbook Mila...</p>
+    </div>
+
+    <!-- Audio Control -->
+    <button class="music-btn" id="musicBtn" aria-label="Play Music">
+        <i class="fa-solid fa-music"></i>
+    </button>
+    <audio id="bgMusic" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=happy-birthday-155461.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Main 3D Book Container -->
+    <div class="book-wrapper">
+        <div class="bookmark-ribbon"></div>
+
+        <div class="book" id="scrapbook">
+            
+            <!-- COVER -->
+            <div class="page cover-page" onclick="flipNext()">
+                <div class="page-content justify-content-center align-items-center">
+                    <div class="washi-tape" style="top: 20px; width: 120px; transform: rotate(-5deg);"></div>
+                    <i class="fa-solid fa-camera-retro mb-3 display-4" style="color: white; opacity: 0.9;"></i>
+                    <h1 class="cover-title">Happy Birthday</h1>
+                    <div class="cover-subtitle">Mila Putri</div>
+                    <div class="cover-badge">"Untuk My Kampung Tersayang"</div>
+                    <p class="mt-4 font-monospace style="font-size: 0.85rem;"><i class="fa-regular fa-calendar-heart me-1"></i> 6 September</p>
+                    <small class="mt-3 text-white-50 handwritten fs-5">Klik untuk membuka <i class="fa-solid fa-arrow-right ms-1"></i></small>
+                </div>
+            </div>
+
+            <!-- HALAMAN 1 -->
+            <div class="page" onclick="flipNext()">
+                <div class="page-content">
+                    <div class="washi-tape" style="top: 15px; left: 20px; width: 90px;"></div>
+                    <div>
+                        <h2 class="handwritten fs-1 mb-3" style="color: var(--rose-gold);">Hai, Mila Kampung.</h2>
+                        <div class="sticky-note mt-3">
+                            <i class="fa-solid fa-thumbtack text-danger position-absolute" style="top: -8px; right: 15px;"></i>
+                            <p class="mb-0">"Aku cuma mau bilang... makasih udah mau jadi temen aku selama 4 tahun.</p>
+                            <p class="mb-0 mt-2">Aku bersyukur banget bisa kenal sama kamu. Tanpa kamu, notif WA aku sepi, nggak ada yang ngajak main ML, nggak ada yang ngajak main Roblox.</p>
+                            <p class="mb-0 mt-2">Hidup aku bawaannya seneng terus karena ada kamu. Setiap ada hal yang aneh, lucu, atau apapun itu, aku selalu ceritain ke kamu.</p>
+                            <p class="mb-0 fw-bold mt-2">Makasih udah hadir dalam hidup aku."</p>
+                        </div>
+                    </div>
+                    
+                    <div class="text-end">
+                        <i class="fa-solid fa-flower-tulip text-danger me-2 display-6"></i>
+                        <i class="fa-solid fa-seedling text-success display-6"></i>
+                    </div>
+                    <span class="page-number">1</span>
+                </div>
+            </div>
+
+            <!-- HALAMAN 2 -->
+            <div class="page" onclick="flipNext()">
+                <div class="page-content">
+                    <div class="washi-tape" style="top: 10px; right: 30px; width: 100px; transform: rotate(3deg);"></div>
+                    <div>
+                        <h2 class="handwritten fs-1 mb-2" style="color: var(--rose-gold);">Happy Birthday!</h2>
+                        <p class="handwritten fs-4" style="line-height: 1.4;">Selamat ulang tahun ya, Mila.</p>
+                        <p class="small text-muted" style="line-height: 1.6;">
+                            Semoga di umur yang baru ini kamu selalu sehat, bahagia, dan dikelilingi orang-orang yang tulus sayang sama kamu.
+                        </p>
+                        <p class="small text-muted" style="line-height: 1.6;">
+                            Semoga semua hal yang lagi kamu usahain pelan-pelan menemukan jalannya. Semoga tahun ini membawa lebih banyak tawa dibanding sedihnya.
+                        </p>
+                    </div>
+
+                    <div class="text-center my-2 p-3 rounded" style="background: rgba(254, 197, 187, 0.2); border: 1px dashed var(--rose-gold);">
+                        <i class="fa-solid fa-cake-candles display-4" style="color: var(--soft-pink);"></i>
+                        <p class="handwritten fs-5 mb-0 mt-2">Make a wish & blow the candles!</p>
+                    </div>
+
+                    <span class="page-number">2</span>
+                </div>
+            </div>
+
+            <!-- HALAMAN 3 -->
+            <div class="page" onclick="flipNext()">
+                <div class="page-content">
+                    <h2 class="handwritten fs-1 text-center mb-3" style="color: var(--rose-gold);">Little Wishes</h2>
+                    
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="sticky-note" style="transform: rotate(-3deg); font-size: 0.95rem;">
+                                ✨ Semoga sehat selalu.
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="sticky-note" style="transform: rotate(2deg); background: #e8f5e9; font-size: 0.95rem;">
+                                🌻 Semoga makin bahagia.
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="sticky-note" style="transform: rotate(4deg); background: #e1f5fe; font-size: 0.95rem;">
+                                🎯 Semoga semua impian tercapai.
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="sticky-note" style="transform: rotate(-2deg); background: #f3e5f5; font-size: 0.95rem;">
+                                🤍 Dikelilingi orang baik.
+                            </div>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <div class="sticky-note text-center" style="transform: rotate(-1deg); background: #fff3e0; font-size: 1rem;">
+                                💡 Semoga rezekinya lancar & hari-harimu selalu menyenangkan!
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <span class="badge bg-light text-dark border me-1">#MilaDay</span>
+                        <span class="badge bg-light text-dark border">#StayAwesome</span>
+                    </div>
+
+                    <span class="page-number">3</span>
+                </div>
+            </div>
+
+            <!-- HALAMAN 4 -->
+            <div class="page" onclick="flipNext()">
+                <div class="page-content">
+                    <div class="washi-tape" style="top: 12px; left: 35%; width: 110px;"></div>
+                    <h2 class="handwritten fs-1 text-center mb-2" style="color: var(--rose-gold);">Our Memories</h2>
+                    
+                    <div class="row g-2 my-auto">
+                        <div class="col-6">
+                            <div class="polaroid-frame">
+                                <div class="polaroid-img">
+                                    <img src="assets/images/image_1.jpeg" alt="">
+                                </div>
+                                <small class="handwritten">Memories 1</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="polaroid-frame" style="transform: rotate(3deg);">
+                                <div class="polaroid-img">
+                                    <img src="assets/images/image_2.jpeg" alt="">
+                                </div>
+                                <small class="handwritten">Memories 2</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="polaroid-frame" style="transform: rotate(-2deg);">
+                                <div class="polaroid-img">
+                                    <img src="assets/images/image_3.jpeg" alt="">
+                                </div>
+                                <small class="handwritten">Memories 3</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="polaroid-frame" style="transform: rotate(4deg);">
+                                <div class="polaroid-img">
+                                    <img src="assets/images/image_4.jpeg" alt="">
+                                </div>
+                                <small class="handwritten">Memories 4</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-1">
+                        <i class="fa-solid fa-paperclip text-secondary"></i>
+                        <small class="text-muted handwritten fs-6 ms-1">Momen sederhana yang berharga.</small>
+                    </div>
+
+                    <span class="page-number">4</span>
+                </div>
+            </div>
+
+            <!-- HALAMAN 5 -->
+            <div class="page" onclick="flipNext()">
+                <div class="page-content">
+                    <h2 class="handwritten fs-1 mb-3" style="color: var(--rose-gold);">Things That Make You Special</h2>
+                    
+                    <div class="d-flex flex-column gap-2 my-auto">
+                        <div class="p-2 rounded bg-white border shadow-sm d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-smile text-warning fs-5"></i>
+                            <span class="small">Aku suka cara kamu tersenyum.</span>
+                        </div>
+                        <div class="p-2 rounded bg-white border shadow-sm d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-fire text-danger fs-5"></i>
+                            <span class="small">Aku suka semangat yang kamu punya.</span>
+                        </div>
+                        <div class="p-2 rounded bg-white border shadow-sm d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-bolt text-warning fs-5"></i>
+                            <span class="small">Aku suka energi positif yang kamu bawa.</span>
+                        </div>
+                        <div class="p-2 rounded bg-white border shadow-sm d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-heart text-danger fs-5"></i>
+                            <span class="small">Aku suka caramu bikin orang nyaman.</span>
+                        </div>
+                        <div class="p-2 rounded bg-white border shadow-sm d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-star text-warning fs-5"></i>
+                            <span class="small">Aku suka karena kamu tetap jadi diri sendiri.</span>
+                        </div>
+                    </div>
+
+                    <span class="page-number">5</span>
+                </div>
+            </div>
+
+            <!-- HALAMAN 6 -->
+            <div class="page" onclick="flipNext()">
+                <div class="page-content">
+                    <div class="washi-tape" style="top: 10px; right: 20px; width: 80px;"></div>
+                    <h2 class="handwritten fs-1 mb-2" style="color: var(--rose-gold);">A Little Note</h2>
+                    
+                    <div class="p-3 my-auto rounded" style="background: #fffef0; border: 1px solid #fae19c; box-shadow: 2px 2px 8px rgba(0,0,0,0.05);">
+                        <p class="handwritten fs-5 mb-1">Aku cuma mau bilang...</p>
+                        <p class="handwritten fs-5 mb-1">Terima kasih karena sudah menjadi Mila yang sekarang.</p>
+                        <p class="handwritten fs-5 mb-1">Tetap jadi diri sendiri. Nggak perlu buru-buru buat jadi sempurna. Pelan-pelan juga nggak apa-apa.</p>
+                        <p class="handwritten fs-5 mb-0 fw-bold" style="color: var(--rose-gold);">Nikmati setiap prosesnya. Semoga semua hal baik selalu datang menghampiri kamu.</p>
+                    </div>
+
+                    <div class="text-end handwritten fs-4 me-2">
+                        - Seseorang
+                    </div>
+
+                    <span class="page-number">6</span>
+                </div>
+            </div>
+
+            <!-- HALAMAN TERAKHIR -->
+            <div class="page ending-page">
+                <div class="page-content justify-content-center align-items-center">
+                    <i class="fa-solid fa-sparkles text-warning display-4 mb-2"></i>
+                    <h2 class="handwritten fs-1 fw-bold" style="color: var(--rose-gold);">Happy Birthday,</h2>
+                    <h1 class="cover-title text-dark fs-2 mb-3">Bkondeku! 🎉</h1>
+                    
+                    <p class="small text-muted px-2" style="line-height: 1.6;">
+                        Semoga hari ini dipenuhi banyak tawa, doa baik, kebahagiaan, dan orang-orang yang sayang sama kamu.
+                    </p>
+                    <p class="handwritten fs-5 mt-2" style="color: var(--soft-pink);">
+                        Terima kasih sudah membuka scrapbook kecil ini. Semoga hari ulang tahunmu menyenangkan!
+                    </p>
+
+                    <button class="btn btn-sm btn-outline-danger rounded-pill mt-3 handwritten fs-5" onclick="triggerConfetti()">
+                        <i class="fa-solid fa-party-horn me-1"></i> Rayakan Lagi!
+                    </button>
+
+                    <span class="page-number">7</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Controls -->
+        <div class="nav-controls">
+            <button class="btn-nav" id="prevBtn" onclick="flipPrev()" disabled>
+                <i class="fa-solid fa-arrow-left me-1"></i> Prev
+            </button>
+            <button class="btn-nav" id="nextBtn" onclick="flipNext()">
+                Next <i class="fa-solid fa-arrow-right ms-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Floating Flower Decorations Background -->
+    <div class="floating-flower" style="top: 10%; left: 8%;"><i class="fa-solid fa-flower"></i></div>
+    <div class="floating-flower" style="top: 75%; left: 12%; animation-delay: 1s;"><i class="fa-solid fa-sparkle"></i></div>
+    <div class="floating-flower" style="top: 20%; right: 10%; animation-delay: 2s;"><i class="fa-solid fa-heart"></i></div>
+    <div class="floating-flower" style="top: 80%; right: 15%; animation-delay: 1.5s;"><i class="fa-solid fa-star"></i></div>
+
+    <script>
+        // Page Flip Logic
+        const pages = document.querySelectorAll('.page');
+        const totalPages = pages.length;
+        let currentPage = 0;
+
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        function updateNav() {
+            prevBtn.disabled = currentPage === 0;
+            nextBtn.disabled = currentPage === totalPages - 1;
+        }
+
+        function flipNext() {
+            if (currentPage < totalPages - 1) {
+                pages[currentPage].classList.add('flipped');
+                currentPage++;
+                updateNav();
+
+                // Fire confetti on reaching the last page
+                if (currentPage === totalPages - 1) {
+                    triggerConfetti();
+                }
+            }
+        }
+
+        function flipPrev() {
+            if (currentPage > 0) {
+                currentPage--;
+                pages[currentPage].classList.remove('flipped');
+                updateNav();
+            }
+        }
+
+        // Confetti Function
+        function triggerConfetti() {
+            var duration = 3 * 1000;
+            var end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#f4acb7', '#ffb5a7', '#d4a373']
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#f4acb7', '#ffb5a7', '#d4a373']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+
+        // Music Player Logic
+        const musicBtn = document.getElementById('musicBtn');
+        const bgMusic = document.getElementById('bgMusic');
+        let isPlaying = false;
+
+        musicBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (isPlaying) {
+                bgMusic.pause();
+                musicBtn.innerHTML = '<i class="fa-solid fa-music"></i>';
+            } else {
+                bgMusic.play();
+                musicBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+            }
+            isPlaying = !isPlaying;
+        });
+
+        // Hide Loader
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loader');
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                loader.style.visibility = 'hidden';
+            }, 600);
+        });
+    </script>
+</body>
+</html>
