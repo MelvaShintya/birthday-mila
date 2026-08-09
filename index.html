@@ -358,20 +358,133 @@
         }
 
         /* Responsive Fix */
-        @media (max-width: 576px) {
-            .book {
-                height: 560px;
-            }
-            .cover-title {
-                font-size: 2.8rem;
-            }
-            .page-content {
-                padding: 20px 18px;
-            }
-            .polaroid-img {
-                height: 85px;
-            }
-        }
+        /* ==========================================================
+   MOBILE RESPONSIVE FIX (320px - 768px)
+   ========================================================== */
+@media (max-width: 768px) {
+    /* 1. Izinkan scroll halaman luar jika tinggi layar perangkat sangat kecil */
+    html, body {
+        overflow-y: auto;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    /* 2. Sesuaikan pembungkus utama buku */
+    .book-wrapper {
+        height: auto;
+        min-height: 100vh;
+        padding: 15px 10px 80px 10px;
+    }
+
+    /* 3. Buat dimensi buku dinamis dan halaman dapat di-scroll secara internal */
+    .book {
+        width: 100%;
+        max-width: 420px;
+        height: 82vh;
+        max-height: 680px;
+        min-height: 520px;
+    }
+
+    .page {
+        overflow-y: auto !important; /* Mencegah teks terpotong dengan scroll internal halaman */
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .page-content {
+        padding: 18px 14px 35px 14px;
+        justify-content: flex-start; /* Mencegah pereregangan vertikal berlebih */
+        gap: 10px;
+    }
+
+    /* 4. Penyesuaian Halaman Cover & Judul Utama */
+    .cover-title {
+        font-size: 2.5rem;
+    }
+
+    .cover-subtitle {
+        font-size: 1.5rem;
+    }
+
+    .cover-badge {
+        font-size: 1rem;
+        padding: 4px 14px;
+    }
+
+    /* 5. Optimasi Judul & Teks Penjelas (Halaman 1 - 7) */
+    .handwritten.fs-1 {
+        font-size: 1.75rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .handwritten.fs-4 {
+        font-size: 1.25rem !important;
+    }
+
+    .handwritten.fs-5 {
+        font-size: 1.05rem !important;
+    }
+
+    /* 6. Penyesuaian Sticky Notes & Konten Teks Panjang */
+    .sticky-note {
+        padding: 10px 12px;
+        font-size: 0.95rem;
+        line-height: 1.35;
+    }
+
+    .sticky-note p {
+        font-size: 0.9rem;
+    }
+
+    /* 7. Penyesuaian Grid Wishes (Halaman 3) & Polaroid (Halaman 4) */
+    .polaroid-frame {
+        padding: 8px 8px 24px 8px;
+    }
+
+    .polaroid-img {
+        height: 90px;
+    }
+
+    /* 8. Penyesuaian List "Things That Make You Special" (Halaman 5) */
+    .page-content .d-flex.flex-column.gap-2 {
+        gap: 6px !important;
+    }
+
+    .page-content .d-flex.align-items-center.gap-2 {
+        padding: 6px 10px !important;
+    }
+
+    /* 9. Penyesuaian Tombol Navigasi */
+    .nav-controls {
+        margin-top: 15px;
+        gap: 12px;
+    }
+
+    .btn-nav {
+        padding: 6px 18px;
+        font-size: 1rem;
+    }
+}
+
+/* Penyesuaian Ekstra khusus Layar Sangat Kecil (<= 380px) */
+@media (max-width: 380px) {
+    .book {
+        height: 85vh;
+        min-height: 480px;
+    }
+
+    .cover-title {
+        font-size: 2.1rem;
+    }
+
+    .polaroid-img {
+        height: 75px;
+    }
+
+    .sticky-note {
+        font-size: 0.85rem;
+        padding: 8px 10px;
+    }
+}
     </style>
 </head>
 <body>
